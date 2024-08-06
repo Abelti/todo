@@ -1,39 +1,54 @@
-import { createStore, combineReducer } from 'redux';
+import { configureStore, createSlice } from '@reduxjs/toolkit';
 
-const initialState  {
-    tasks: [],
-    completedTasks: []
-};
-
-const tasksReducer = (state = initialState.tasks, action) => {
-    switch (action.type) {
-        case 'ADD_TASK':
-            return [...state, action.payload];
-        case 'DELETE_TASK':
+const taskSlice = createSlice({
+    name: "tasks",
+    initialState: [],
+    reducers: {
+        addTask: (state, action) => {
+            state.push(action.payload);
+        },
+        deleteTask: (state, action) => {
             return state.filter(task => task.id !== action.payload);
-        case 'UPDATE_TASK':
-            return state.map(task => task.id === action.payload.id ? { ...task, ...action.payload } : task);
-        case 'MARK_AS_COMPLETED':
-            return state.map(task => task.id !== action.payload);
-        default:
-            return state;
+        },
+        updateTask: (state, action) => {
+            const task = state.find(task => task.id === action.payload.id);
+            if (task) {
+                task.text = action.payload.updates.text;
+                task.dueDate = action.payload.updates.dueDate;
+            }
+        },
+        markAsCompleted: (state, action) => {
+            const task = state.find(task => task.id === action.payload);
+            if (task) {
+                task.accomplished = true;
+            }
+        }
     }
-}
-
-const completedTasksReducer = (state = initialState.completedTasks, action) => {
-    switch (action.type) {
-        case 'MARK_AS_COMPLETED':
-            return [...state, action.payload];
-        default:
-            return state;
-    }
-}
-
-const rootReducer = combineReducer({
-    tasks: tasksReducer,
-    completedTasks: completedTasksReducer
 });
 
-const store = createStore(rootReducer);
+const completedTaskSlice = createSlice({
+    name: "completedTasks",
+    initialState: [],
+    reducers: {
+        addCompletedTask: (state, action) => {
+            state.push(action.payload);
+        }
+    },
+    extraReducers: (builder) => {
+        builder.addCase(taskSlice.actions.markAsCompleted, (state, action) => {
+            const task = action.payload;
+            state.push(task);
+        });
+    }
+});
 
+const store = configureStore({
+    reducer: {
+        tasks: taskSlice.reducer,
+        completedTasks: completedTaskSlice.reducer
+    }
+});
+
+export const { addTask, deleteTask, updateTask, markAsCompleted } = taskSlice.actions;
+export const { addCompletedTask } = completedTaskSlice.actions;
 export default store;

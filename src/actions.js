@@ -1,4 +1,4 @@
-export const addTask = task => ({
+/* export const addTask = task => ({
     type: 'ADD_TASK',
     payload: task
 });
@@ -16,4 +16,4 @@ export const updateTask = (id, updates ) => ({
 export const markAsCompleted = task => ({
     type: 'MARK_AS_COMPLETED',
     payload: task
-});
+}); */
